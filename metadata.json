@@ -1,0 +1,6 @@
+{
+  "name": "PortWatch Live",
+  "description": "Real-time developer race and GPU port compatibility telemetry tracker with live GitHub commit feeds, weighted milestone scoring, and custom alert rules.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
