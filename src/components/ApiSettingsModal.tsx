@@ -54,13 +54,12 @@ export function ApiSettingsModal({
     onClose();
   };
 
-  const resetTimeText =
-    rateLimit?.resetAt
-      ? new Date(rateLimit.resetAt * 1000).toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
-        })
-      : null;
+  const resetTimeText = rateLimit?.resetAt
+    ? new Date(rateLimit.resetAt * 1000).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : null;
 
   return (
     <div
@@ -70,16 +69,18 @@ export function ApiSettingsModal({
       aria-label="GitHub API Settings"
     >
       <div
-        className="fixed inset-0 bg-black/70 backdrop-blur-[2px]"
+        className="fixed inset-0 bg-slate-950/55 dark:bg-black/75"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      <div className="relative z-10 w-full max-w-md rounded-lg bg-[#131822] border border-[#253044] shadow-2xl shadow-black/80 overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#1E2636] flex items-center justify-between">
+      <div className="relative z-10 w-full max-w-md rounded-[24px] bg-white dark:bg-[#131822] border border-slate-200 dark:border-[#253044] shadow-2xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-[#1E2636] flex items-center justify-between">
           <div>
-            <h2 className="text-base font-bold text-slate-50">GitHub API Settings</h2>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <h2 className="font-display text-lg font-bold text-[#0D0E14] dark:text-white">
+              GitHub API Settings
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Configure rate-limit authentication and live polling cadence.
             </p>
           </div>
@@ -87,21 +88,23 @@ export function ApiSettingsModal({
             type="button"
             onClick={onClose}
             aria-label="Close GitHub API Settings"
-            className="w-8 h-8 rounded-md inline-flex items-center justify-center text-slate-400 hover:text-slate-100 hover:bg-[#1E2636] cursor-pointer"
+            className="w-8 h-8 rounded-full inline-flex items-center justify-center text-slate-500 hover:text-[#0D0E14] dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1E2636] cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-5">
-          {/* GitHub PAT */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div>
-            <label htmlFor="github-pat-input" className="block text-xs font-medium text-slate-200 mb-1.5">
+            <label
+              htmlFor="github-pat-input"
+              className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5"
+            >
               GitHub Personal Access Token (Optional)
             </label>
             <div className="relative">
               <KeyRound
-                className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                className="w-3.5 h-3.5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
                 aria-hidden="true"
               />
               <input
@@ -111,28 +114,27 @@ export function ApiSettingsModal({
                 onChange={(e) => setPat(e.target.value)}
                 placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
                 autoComplete="off"
-                className="w-full bg-[#0B0E14] border border-[#253044] rounded-md pl-8 pr-9 py-2 text-xs font-mono text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-400"
+                className="w-full bg-slate-50 dark:bg-[#0B0E14] border border-slate-200 dark:border-[#253044] rounded-xl pl-9 pr-10 py-2.5 text-xs font-mono text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:border-pink-500"
               />
               <button
                 type="button"
                 onClick={() => setShowPat((v) => !v)}
                 aria-label={showPat ? 'Hide token' : 'Show token'}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 cursor-pointer"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer"
               >
                 {showPat ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
-            <p className="mt-1.5 text-[11px] text-slate-400 leading-relaxed flex items-start gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" aria-hidden="true" />
+            <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed flex items-start gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" aria-hidden="true" />
               <span>
-                Upgrades GitHub REST API quota from 60 to 5,000 req/hr. Stored locally in your browser via <code className="font-mono text-slate-300">localStorage</code>.
+                Upgrades GitHub REST API quota from 60 to 5,000 req/hr. Stored locally in your browser via <code className="font-mono text-slate-700 dark:text-slate-300">localStorage</code>.
               </span>
             </p>
           </div>
 
-          {/* Polling Interval */}
           <div>
-            <span className="block text-xs font-medium text-slate-200 mb-2">
+            <span className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-2">
               Live API Polling Interval
             </span>
             <div
@@ -153,10 +155,10 @@ export function ApiSettingsModal({
                   role="radio"
                   aria-checked={intervalSec === opt.sec}
                   onClick={() => setIntervalSec(opt.sec)}
-                  className={`py-2 rounded-md border text-xs font-mono font-semibold transition-colors cursor-pointer ${
+                  className={`py-2 rounded-xl border text-xs font-mono font-semibold transition-colors cursor-pointer ${
                     intervalSec === opt.sec
-                      ? 'bg-cyan-500/15 border-cyan-500/50 text-cyan-200'
-                      : 'bg-[#0B0E14] border-[#253044] text-slate-400 hover:text-slate-200'
+                      ? 'bg-[#0D0E14] dark:bg-white border-[#0D0E14] dark:border-white text-white dark:text-[#0D0E14]'
+                      : 'bg-slate-50 dark:bg-[#0B0E14] border-slate-200 dark:border-[#253044] text-slate-600 dark:text-slate-400 hover:text-[#0D0E14] dark:hover:text-slate-200'
                   }`}
                 >
                   {opt.label}
@@ -165,11 +167,10 @@ export function ApiSettingsModal({
             </div>
           </div>
 
-          {/* Rate Limit Status Readout */}
-          <div className="rounded-md bg-[#0F141D] border border-[#1E2636] px-3.5 py-3 text-xs font-mono">
-            <div className="flex items-center justify-between text-slate-400">
+          <div className="rounded-2xl bg-slate-50 dark:bg-[#0E131D] border border-slate-100 dark:border-[#1E2636] px-4 py-3 text-xs font-mono">
+            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
               <span>X-RateLimit-Remaining</span>
-              <span className="text-slate-100 font-semibold tabular-nums">
+              <span className="text-[#0D0E14] dark:text-slate-100 font-semibold tabular-nums">
                 {rateLimit && rateLimit.remaining !== null && rateLimit.limit !== null
                   ? `${rateLimit.remaining} / ${rateLimit.limit}`
                   : pat.trim()
@@ -178,20 +179,19 @@ export function ApiSettingsModal({
               </span>
             </div>
             {resetTimeText && (
-              <div className="flex items-center justify-between text-[11px] text-slate-500 mt-1">
+              <div className="flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500 mt-1">
                 <span>Window resets at</span>
                 <span className="tabular-nums">{resetTimeText}</span>
               </div>
             )}
           </div>
 
-          {/* Clear Local Cache */}
-          <div className="pt-3 border-t border-[#1E2636] flex items-center justify-between gap-2">
+          <div className="pt-3 border-t border-slate-100 dark:border-[#1E2636] flex items-center justify-between gap-2">
             {!confirmReset ? (
               <button
                 type="button"
                 onClick={() => setConfirmReset(true)}
-                className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-rose-300 cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 Clear Local Cache
@@ -204,14 +204,14 @@ export function ApiSettingsModal({
                     onResetAllData();
                     onClose();
                   }}
-                  className="px-2.5 py-1 rounded bg-rose-500 hover:bg-rose-400 text-slate-950 text-xs font-semibold cursor-pointer"
+                  className="px-3 py-1.5 rounded-full bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold cursor-pointer"
                 >
                   Confirm Clear
                 </button>
                 <button
                   type="button"
                   onClick={() => setConfirmReset(false)}
-                  className="text-xs text-slate-400 hover:text-slate-200 cursor-pointer"
+                  className="text-xs text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -222,13 +222,13 @@ export function ApiSettingsModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-3.5 py-2 rounded-md border border-[#253044] text-xs font-medium text-slate-300 hover:text-slate-100 cursor-pointer"
+                className="px-4 py-2 rounded-full border border-slate-200 dark:border-[#253044] text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-[#0D0E14] dark:hover:text-white cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 rounded-md bg-emerald-500 hover:bg-emerald-400 text-[#06130D] text-xs font-semibold cursor-pointer"
+                className="px-5 py-2 rounded-full bg-[#0D0E14] hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-[#0D0E14] text-xs font-semibold cursor-pointer"
               >
                 Save Settings
               </button>

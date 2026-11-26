@@ -16,10 +16,10 @@ interface LiveFeedPanelProps {
 
 const FILTERS: { value: FeedFilter; label: string }[] = [
   { value: 'all', label: 'All' },
-  { value: 'lead_change', label: 'Lead Changes' },
   { value: 'commit', label: 'Commits' },
-  { value: 'new_repo', label: 'New Repos' },
+  { value: 'lead_change', label: 'Lead Changes' },
   { value: 'benchmark', label: 'Benchmarks' },
+  { value: 'new_repo', label: 'New Repos' },
 ];
 
 export function LiveFeedPanel({ events, onSelectRepo }: LiveFeedPanelProps) {
@@ -35,31 +35,31 @@ export function LiveFeedPanel({ events, onSelectRepo }: LiveFeedPanelProps) {
       case 'lead_change':
         return {
           icon: Trophy,
-          accent: 'text-emerald-400',
+          accent: 'text-emerald-600 dark:text-emerald-400',
           label: 'Lead Change',
         };
       case 'commit':
         return {
           icon: GitCommitHorizontal,
-          accent: 'text-cyan-400',
+          accent: 'text-pink-600 dark:text-cyan-400',
           label: 'Commit',
         };
       case 'new_repo':
         return {
           icon: PlusCircle,
-          accent: 'text-emerald-300',
+          accent: 'text-violet-600 dark:text-violet-400',
           label: 'New Repo',
         };
       case 'benchmark':
         return {
           icon: Gauge,
-          accent: 'text-amber-400',
+          accent: 'text-orange-600 dark:text-amber-400',
           label: 'Benchmark',
         };
       case 'alert':
         return {
           icon: BellRing,
-          accent: 'text-amber-300',
+          accent: 'text-amber-600 dark:text-amber-300',
           label: 'Alert Rule',
         };
     }
@@ -67,24 +67,25 @@ export function LiveFeedPanel({ events, onSelectRepo }: LiveFeedPanelProps) {
 
   return (
     <section
+      id="changes"
       aria-label="Live GitHub Commit and Telemetry Feed"
-      className="bg-[#131822] border border-[#1E2636] rounded-lg overflow-hidden flex flex-col"
+      className="scroll-mt-24 rounded-[22px] bg-white dark:bg-[#131822] border border-slate-200/80 dark:border-[#1E2636] shadow-[0_12px_36px_-18px_rgba(15,23,42,0.1)] dark:shadow-none p-5 sm:p-6"
     >
-      <div className="px-4 py-3.5 border-b border-[#1E2636]">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold text-slate-100">
-            Live Commit & Telemetry Feed
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div className="flex items-baseline gap-3">
+          <h2 className="font-display text-sm font-extrabold tracking-wider text-slate-500 dark:text-slate-400">
+            What changed
           </h2>
-          <span className="font-mono text-[11px] text-slate-400 tabular-nums">
-            {filteredEvents.length} events
+          <span className="font-mono text-xs text-slate-400 dark:text-slate-500 tabular-nums">
+            {filteredEvents.length} live {filteredEvents.length === 1 ? 'event' : 'events'}
           </span>
         </div>
 
-        {/* Interactive Filter Tabs */}
+        {/* Clean Segmented Filter Tabs */}
         <div
           role="group"
           aria-label="Filter telemetry feed"
-          className="mt-3 flex flex-wrap items-center gap-1"
+          className="inline-flex flex-nowrap items-center max-w-full overflow-x-auto p-1 rounded-full bg-slate-100 dark:bg-[#0D1119] border border-slate-200/70 dark:border-[#1E2636] gap-0.5"
         >
           {FILTERS.map((f) => (
             <button
@@ -92,10 +93,10 @@ export function LiveFeedPanel({ events, onSelectRepo }: LiveFeedPanelProps) {
               type="button"
               onClick={() => setFilter(f.value)}
               aria-pressed={filter === f.value}
-              className={`px-2.5 py-1 rounded text-[11px] font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 filter === f.value
-                  ? 'bg-[#1F293B] text-cyan-300 border border-cyan-500/35'
-                  : 'bg-[#0D1119] text-slate-400 border border-[#1E2636] hover:text-slate-200'
+                  ? 'bg-white dark:bg-[#1D2638] text-[#0D0E14] dark:text-white shadow-xs'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
               {f.label}
@@ -104,58 +105,56 @@ export function LiveFeedPanel({ events, onSelectRepo }: LiveFeedPanelProps) {
         </div>
       </div>
 
-      {/* Scrolling Event Log */}
-      <div className="max-h-[430px] overflow-y-auto divide-y divide-[#1A2231]">
-        {filteredEvents.length === 0 ? (
-          <div className="px-4 py-10 text-center text-xs text-slate-400">
-            No {filter === 'all' ? 'telemetry' : filter.replace('_', ' ')} events recorded yet.
-          </div>
-        ) : (
-          filteredEvents.map((evt) => {
+      {/* Horizontal Editorial Change Cards */}
+      {filteredEvents.length === 0 ? (
+        <div className="rounded-2xl bg-slate-50 dark:bg-[#0D1119] border border-dashed border-slate-200 dark:border-[#242F44] px-5 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
+          No {filter === 'all' ? 'telemetry' : filter.replace('_', ' ')} events recorded yet. Live GitHub commits and logged benchmarks appear here automatically.
+        </div>
+      ) : (
+        <div className="flex gap-3.5 overflow-x-auto pb-2 snap-x">
+          {filteredEvents.slice(0, 16).map((evt) => {
             const { icon: Icon, accent, label } = renderEventMeta(evt.type);
             return (
               <article
                 key={evt.id}
-                className={`px-4 py-3 transition-colors hover:bg-[#171E2C] ${
-                  evt.type === 'lead_change' ? 'bg-emerald-500/[0.04]' : ''
-                }`}
+                onClick={() => onSelectRepo(evt.repoId)}
+                className="snap-start shrink-0 w-[300px] sm:w-[330px] rounded-2xl bg-slate-50/90 dark:bg-[#0E131D] hover:bg-slate-100/80 dark:hover:bg-[#171E2E] border border-slate-200/70 dark:border-[#1E2636] p-4 transition-colors cursor-pointer flex flex-col justify-between"
               >
-                <div className="flex items-center justify-between gap-2 text-[11px] font-mono">
-                  <span className={`inline-flex items-center gap-1.5 font-semibold ${accent}`}>
-                    <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-                    {label}
-                  </span>
-                  <span className="text-slate-500 tabular-nums shrink-0">
-                    {formatRelativeTime(evt.timestamp)}
-                  </span>
-                </div>
-
-                <div className="mt-1 flex items-center justify-between gap-2">
-                  <button
-                    type="button"
-                    onClick={() => onSelectRepo(evt.repoId)}
-                    className="text-xs font-semibold text-slate-200 hover:text-cyan-300 truncate text-left cursor-pointer"
-                  >
-                    {evt.repoFullName}
-                  </button>
-                  {evt.meta && (
-                    <span className="font-mono text-[11px] text-slate-400 shrink-0 tabular-nums">
-                      {evt.meta}
+                <div>
+                  <div className="flex items-center justify-between gap-2 text-[11px] font-mono">
+                    <span className={`inline-flex items-center gap-1.5 font-semibold ${accent}`}>
+                      <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                      {label}
                     </span>
-                  )}
+                    <span className="text-slate-400 dark:text-slate-500 tabular-nums shrink-0">
+                      {formatRelativeTime(evt.timestamp)}
+                    </span>
+                  </div>
+
+                  <div className="mt-2 flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold text-[#0D0E14] dark:text-slate-100 truncate">
+                      {evt.repoFullName}
+                    </span>
+                    {evt.meta && (
+                      <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400 shrink-0 tabular-nums">
+                        {evt.meta}
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-slate-700 dark:text-slate-300 mt-1.5 leading-relaxed line-clamp-2">
+                    {evt.title}
+                  </p>
                 </div>
 
-                <p className="text-xs text-slate-300 mt-1 leading-snug break-words">
-                  {evt.title}
-                </p>
-                <p className="text-[11px] text-slate-400 mt-0.5 leading-snug">
+                <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-2.5 truncate">
                   {evt.detail}
                 </p>
               </article>
             );
-          })
-        )}
-      </div>
+          })}
+        </div>
+      )}
     </section>
   );
 }

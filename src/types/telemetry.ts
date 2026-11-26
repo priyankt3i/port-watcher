@@ -51,6 +51,8 @@ export interface TrackedRepo {
   onePercentLowFps: number | null;
   ramFootprintGb: number | null;
   stars: number | null;
+  forks?: number | null;
+  license?: string | null;
   openIssues: number | null;
   latestCommit: CommitInfo | null;
   recentCommits: CommitInfo[];
@@ -136,6 +138,8 @@ export interface GithubRepoVerificationResult {
   fullName: string;
   description: string | null;
   stars: number | null;
+  forks?: number | null;
+  license?: string | null;
   openIssues: number | null;
   defaultBranch: string | null;
   avatarUrl: string;

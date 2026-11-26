@@ -153,8 +153,7 @@ export function AddRepoModal({
 
     const nowIso = new Date().toISOString();
     const verifiedMatchesInput =
-      verification?.ok &&
-      verification.fullName.toLowerCase() === parsed.id;
+      verification?.ok && verification.fullName.toLowerCase() === parsed.id;
 
     const finalMilestones = includeMilestones ? milestones : null;
     const finalScore = includeMilestones ? calculatePlayabilityScore(milestones) : null;
@@ -191,6 +190,8 @@ export function AddRepoModal({
       onePercentLowFps: parsedLow,
       ramFootprintGb: parsedRam,
       stars: verifiedMatchesInput ? verification.stars : null,
+      forks: verifiedMatchesInput ? (verification.forks ?? null) : null,
+      license: verifiedMatchesInput ? (verification.license ?? null) : null,
       openIssues: verifiedMatchesInput ? verification.openIssues : null,
       latestCommit: verifiedMatchesInput ? (verification.latestCommit ?? null) : null,
       recentCommits: verifiedMatchesInput ? (verification.recentCommits ?? []) : [],
@@ -217,17 +218,19 @@ export function AddRepoModal({
       aria-label="Track New Repository"
     >
       <div
-        className="fixed inset-0 bg-black/70 backdrop-blur-[2px]"
+        className="fixed inset-0 bg-slate-950/55 dark:bg-black/75"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      <div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg bg-[#131822] border border-[#253044] shadow-2xl shadow-black/80">
+      <div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[24px] bg-white dark:bg-[#131822] border border-slate-200 dark:border-[#253044] shadow-2xl">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-[#1E2636] flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-[#1E2636] flex items-center justify-between">
           <div>
-            <h2 className="text-base font-bold text-slate-50">Track New Repository</h2>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <h2 className="font-display text-lg font-bold text-[#0D0E14] dark:text-white">
+              Track New Repository
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Fetches live GitHub metadata. Leave unmeasured benchmark fields blank to display N/A.
             </p>
           </div>
@@ -235,16 +238,19 @@ export function AddRepoModal({
             type="button"
             onClick={onClose}
             aria-label="Close Add Repository modal"
-            className="w-8 h-8 rounded-md inline-flex items-center justify-center text-slate-400 hover:text-slate-100 hover:bg-[#1E2636] cursor-pointer"
+            className="w-8 h-8 rounded-full inline-flex items-center justify-center text-slate-500 hover:text-[#0D0E14] dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1E2636] cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-5">
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {/* Repo URL / Shorthand + Verify Button */}
           <div>
-            <label htmlFor="add-repo-input" className="block text-xs font-medium text-slate-200 mb-1.5">
+            <label
+              htmlFor="add-repo-input"
+              className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5"
+            >
               GitHub Repository URL or Shorthand
             </label>
             <div className="flex flex-col sm:flex-row gap-2">
@@ -258,18 +264,18 @@ export function AddRepoModal({
                 }}
                 placeholder="https://github.com/owner/repo or owner/repo"
                 required
-                className="flex-1 bg-[#0B0E14] border border-[#253044] rounded-md px-3 py-2 text-xs font-mono text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-400"
+                className="flex-1 bg-slate-50 dark:bg-[#0B0E14] border border-slate-200 dark:border-[#253044] rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-pink-500"
               />
               <button
                 type="button"
                 onClick={handleVerify}
                 disabled={isVerifying}
-                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-md border border-cyan-500/40 bg-cyan-500/12 text-cyan-200 hover:bg-cyan-500/20 text-xs font-semibold whitespace-nowrap shrink-0 disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-pink-300 dark:border-pink-500/40 bg-pink-50 dark:bg-pink-500/12 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-500/20 text-xs font-semibold whitespace-nowrap shrink-0 disabled:opacity-50 cursor-pointer"
               >
                 {isVerifying ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    Verifying...
+                    Verifying…
                   </>
                 ) : (
                   <>
@@ -281,43 +287,45 @@ export function AddRepoModal({
             </div>
           </div>
 
-          {/* Form Error Banner */}
           {formError && (
             <div
               role="alert"
-              className="rounded-md border border-rose-500/40 bg-rose-500/10 px-3.5 py-2.5 text-xs text-rose-200 flex items-start gap-2"
+              className="rounded-xl border border-rose-200 dark:border-rose-500/40 bg-rose-50 dark:bg-rose-500/10 px-4 py-3 text-xs text-rose-700 dark:text-rose-200 flex items-start gap-2"
             >
-              <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" aria-hidden="true" />
+              <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" aria-hidden="true" />
               <span>{formError}</span>
             </div>
           )}
 
-          {/* GitHub Verification Banner (Success or 404/DMCA/403 Error) */}
-          {verification && (
-            verification.ok ? (
-              <div className="rounded-md border border-emerald-500/35 bg-emerald-500/8 p-3.5 space-y-2">
+          {verification &&
+            (verification.ok ? (
+              <div className="rounded-xl border border-emerald-200 dark:border-emerald-500/35 bg-emerald-50/70 dark:bg-emerald-500/10 p-4 space-y-2">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-300">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
                     <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
                     Verified on GitHub: {verification.fullName}
                   </span>
-                  <span className="font-mono text-[11px] text-slate-300 tabular-nums">
+                  <span className="font-mono text-[11px] text-slate-600 dark:text-slate-300 tabular-nums">
                     {verification.stars !== null ? `${verification.stars.toLocaleString()} ★` : 'N/A ★'} ·{' '}
-                    {verification.openIssues !== null ? `${verification.openIssues} issues` : 'N/A issues'}
+                    {verification.openIssues !== null
+                      ? `${verification.openIssues} issues`
+                      : 'N/A issues'}
                   </span>
                 </div>
-                <p className="text-xs text-slate-300 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                   {verification.description ?? 'No repository description on GitHub.'}
                 </p>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-mono text-slate-400">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-mono text-slate-500 dark:text-slate-400">
                   <span className="inline-flex items-center gap-1">
-                    <GitBranch className="w-3 h-3 text-cyan-400" aria-hidden="true" />
+                    <GitBranch className="w-3 h-3 text-pink-500" aria-hidden="true" />
                     {verification.defaultBranch ?? 'N/A'}
                   </span>
                   {verification.latestCommit && (
                     <span className="inline-flex items-center gap-1 truncate max-w-md">
-                      <GitCommitHorizontal className="w-3 h-3 text-cyan-400 shrink-0" aria-hidden="true" />
-                      <span className="text-cyan-300">{verification.latestCommit.sha}</span>
+                      <GitCommitHorizontal className="w-3 h-3 text-pink-500 shrink-0" aria-hidden="true" />
+                      <span className="text-pink-600 dark:text-cyan-300">
+                        {verification.latestCommit.sha}
+                      </span>
                       <span className="truncate">{verification.latestCommit.message}</span>
                     </span>
                   )}
@@ -326,31 +334,33 @@ export function AddRepoModal({
             ) : (
               <div
                 role="alert"
-                className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3.5 text-xs text-amber-200 flex items-start gap-2.5"
+                className="rounded-xl border border-amber-200 dark:border-amber-500/40 bg-amber-50 dark:bg-amber-500/10 p-4 text-xs text-amber-800 dark:text-amber-200 flex items-start gap-2.5"
               >
-                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" aria-hidden="true" />
+                <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" aria-hidden="true" />
                 <div>
-                  <p className="font-semibold text-amber-100">GitHub Verification Failed</p>
-                  <p className="mt-0.5 text-amber-200/90 leading-relaxed">{verification.errorMessage}</p>
-                  <p className="mt-1 text-[11px] text-slate-300">
+                  <p className="font-semibold">GitHub Verification Failed</p>
+                  <p className="mt-0.5 leading-relaxed">{verification.errorMessage}</p>
+                  <p className="mt-1 text-[11px] text-slate-600 dark:text-slate-300">
                     You can still track this repo; missing GitHub metadata will display as N/A.
                   </p>
                 </div>
               </div>
-            )
-          )}
+            ))}
 
           {/* GPU Target & Optional Numeric Telemetry */}
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
             <div className="sm:col-span-5">
-              <label htmlFor="add-gpu-target" className="block text-xs font-medium text-slate-300 mb-1 whitespace-nowrap">
+              <label
+                htmlFor="add-gpu-target"
+                className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1 whitespace-nowrap"
+              >
                 Target GPU Architecture
               </label>
               <select
                 id="add-gpu-target"
                 value={gpuTarget}
                 onChange={(e) => setGpuTarget(e.target.value as GpuTarget)}
-                className="w-full bg-[#0B0E14] border border-[#253044] rounded-md px-2.5 py-2 text-xs text-slate-100"
+                className="w-full bg-slate-50 dark:bg-[#0B0E14] border border-slate-200 dark:border-[#253044] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-slate-100"
               >
                 <option value="AMD RDNA3/4">AMD RDNA3/4</option>
                 <option value="NVIDIA Ada/Blackwell">NVIDIA Ada/Blackwell</option>
@@ -359,7 +369,10 @@ export function AddRepoModal({
             </div>
 
             <div className="sm:col-span-2">
-              <label htmlFor="add-avg-fps" className="block text-xs font-medium text-slate-300 mb-1 whitespace-nowrap">
+              <label
+                htmlFor="add-avg-fps"
+                className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1 whitespace-nowrap"
+              >
                 Avg FPS
               </label>
               <input
@@ -371,12 +384,15 @@ export function AddRepoModal({
                 value={avgFps}
                 onChange={(e) => setAvgFps(e.target.value)}
                 placeholder="N/A"
-                className="w-full bg-[#0B0E14] border border-[#253044] rounded-md px-2.5 py-2 text-xs font-mono text-slate-100 placeholder:text-slate-600 tabular-nums"
+                className="w-full bg-slate-50 dark:bg-[#0B0E14] border border-slate-200 dark:border-[#253044] rounded-xl px-3 py-2 text-xs font-mono text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 tabular-nums"
               />
             </div>
 
             <div className="sm:col-span-2">
-              <label htmlFor="add-low-fps" className="block text-xs font-medium text-slate-300 mb-1 whitespace-nowrap">
+              <label
+                htmlFor="add-low-fps"
+                className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1 whitespace-nowrap"
+              >
                 1% Low
               </label>
               <input
@@ -388,12 +404,15 @@ export function AddRepoModal({
                 value={onePercentLow}
                 onChange={(e) => setOnePercentLow(e.target.value)}
                 placeholder="N/A"
-                className="w-full bg-[#0B0E14] border border-[#253044] rounded-md px-2.5 py-2 text-xs font-mono text-slate-100 placeholder:text-slate-600 tabular-nums"
+                className="w-full bg-slate-50 dark:bg-[#0B0E14] border border-slate-200 dark:border-[#253044] rounded-xl px-3 py-2 text-xs font-mono text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 tabular-nums"
               />
             </div>
 
             <div className="sm:col-span-3">
-              <label htmlFor="add-ram-gb" className="block text-xs font-medium text-slate-300 mb-1 whitespace-nowrap">
+              <label
+                htmlFor="add-ram-gb"
+                className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1 whitespace-nowrap"
+              >
                 RAM Footprint (GB)
               </label>
               <input
@@ -405,24 +424,24 @@ export function AddRepoModal({
                 value={ramGb}
                 onChange={(e) => setRamGb(e.target.value)}
                 placeholder="N/A"
-                className="w-full bg-[#0B0E14] border border-[#253044] rounded-md px-2.5 py-2 text-xs font-mono text-slate-100 placeholder:text-slate-600 tabular-nums"
+                className="w-full bg-slate-50 dark:bg-[#0B0E14] border border-slate-200 dark:border-[#253044] rounded-xl px-3 py-2 text-xs font-mono text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 tabular-nums"
               />
             </div>
           </div>
 
           {/* Optional 5 Weighted Milestone Sliders */}
-          <div className="rounded-lg border border-[#1E2636] bg-[#0F141D] p-4 space-y-3">
+          <div className="rounded-2xl border border-slate-200/80 dark:border-[#1E2636] bg-slate-50 dark:bg-[#0E131D] p-4 space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-200 cursor-pointer">
+              <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={includeMilestones}
                   onChange={(e) => setIncludeMilestones(e.target.checked)}
-                  className="rounded border-[#253044] bg-[#0B0E14] accent-emerald-500"
+                  className="rounded border-slate-300 dark:border-[#253044] accent-pink-500"
                 />
                 Include verified milestone scores (optional)
               </label>
-              <span className="font-mono text-xs font-bold tabular-nums text-emerald-300">
+              <span className="font-mono text-xs font-bold tabular-nums text-pink-600 dark:text-pink-400">
                 Composite Score: {computedScore !== null ? `${computedScore}%` : 'N/A'}
               </span>
             </div>
@@ -435,10 +454,10 @@ export function AddRepoModal({
                   return (
                     <div key={key} className={key === 'bootAndRender' ? 'sm:col-span-2' : ''}>
                       <div className="flex items-center justify-between text-xs mb-1">
-                        <label htmlFor={`add-ms-${key}`} className="text-slate-300">
+                        <label htmlFor={`add-ms-${key}`} className="text-slate-700 dark:text-slate-300">
                           {meta.label}
                         </label>
-                        <span className="font-mono text-cyan-300 tabular-nums">
+                        <span className="font-mono text-pink-600 dark:text-pink-400 tabular-nums">
                           {val} / {meta.max}
                         </span>
                       </div>
@@ -462,17 +481,17 @@ export function AddRepoModal({
           </div>
 
           {/* Footer Actions */}
-          <div className="pt-2 border-t border-[#1E2636] flex items-center justify-end gap-2.5">
+          <div className="pt-3 border-t border-slate-100 dark:border-[#1E2636] flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-md border border-[#253044] text-xs font-medium text-slate-300 hover:text-slate-100 hover:border-slate-500 cursor-pointer"
+              className="px-4 py-2 rounded-full border border-slate-200 dark:border-[#253044] text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-[#0D0E14] dark:hover:text-white cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-md bg-emerald-500 hover:bg-emerald-400 text-[#06130D] text-xs font-semibold cursor-pointer"
+              className="px-5 py-2 rounded-full bg-[#0D0E14] hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-[#0D0E14] text-xs font-semibold cursor-pointer"
             >
               {computedScore !== null ? `Add to Race (${computedScore}%)` : 'Add to Race'}
             </button>

@@ -8,12 +8,12 @@ interface ProgressionChartProps {
 type ChartMetric = 'score' | 'avgFps';
 
 const SERIES_COLORS = [
+  '#EC4899', // Pink
+  '#8B5CF6', // Violet
+  '#F97316', // Orange
   '#10B981', // Emerald
   '#06B6D4', // Cyan
-  '#F59E0B', // Amber
-  '#F43F5E', // Rose
-  '#A78BFA', // Violet
-  '#38BDF8', // Sky
+  '#3B82F6', // Blue
 ];
 
 export function ProgressionChart({ repos }: ProgressionChartProps) {
@@ -42,7 +42,6 @@ export function ProgressionChart({ repos }: ProgressionChartProps) {
     [topRepos, hiddenRepoIds]
   );
 
-  // Collect union of all real recorded dates across top repos
   const timelineDates = useMemo(() => {
     const map = new Map<string, string>();
     for (const r of topRepos) {
@@ -72,13 +71,12 @@ export function ProgressionChart({ repos }: ProgressionChartProps) {
     });
   };
 
-  // Chart SVG dimensions
-  const width = 760;
-  const height = 250;
+  const width = 720;
+  const height = 240;
   const padLeft = 42;
   const padRight = 18;
   const padTop = 18;
-  const padBottom = 30;
+  const padBottom = 28;
   const plotW = width - padLeft - padRight;
   const plotH = height - padTop - padBottom;
 
@@ -114,42 +112,43 @@ export function ProgressionChart({ repos }: ProgressionChartProps) {
 
   return (
     <section
+      id="history"
       aria-label="14-Day Progression History Chart"
-      className="bg-[#131822] border border-[#1E2636] rounded-lg overflow-hidden"
+      className="scroll-mt-24 rounded-[22px] bg-white dark:bg-[#131822] border border-slate-200/80 dark:border-[#1E2636] shadow-[0_10px_30px_-18px_rgba(15,23,42,0.1)] dark:shadow-none overflow-hidden flex flex-col"
     >
-      <div className="px-4 py-3.5 border-b border-[#1E2636] flex flex-wrap items-center justify-between gap-3">
+      <div className="px-5 sm:px-6 py-4 border-b border-slate-100 dark:border-[#1E2636] flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-sm sm:text-base font-semibold text-slate-100">
+          <h2 className="font-display text-lg font-bold text-[#0D0E14] dark:text-white">
             Progression History
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Recorded benchmark trajectory for top tracked repositories (no synthetic history).
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Recorded benchmark snapshots over time (zero synthetic data).
           </p>
         </div>
 
         <div
           role="group"
           aria-label="Chart Metric Toggle"
-          className="inline-flex items-center p-0.5 rounded-md bg-[#0D1119] border border-[#1E2636]"
+          className="inline-flex items-center p-1 rounded-full bg-slate-100 dark:bg-[#0D1119] border border-slate-200/70 dark:border-[#1E2636]"
         >
           <button
             type="button"
             onClick={() => setMetric('score')}
-            className={`px-3 py-1.5 rounded text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
+            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
               metric === 'score'
-                ? 'bg-[#1D2638] text-emerald-300'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-white dark:bg-[#1D2638] text-[#0D0E14] dark:text-white shadow-xs'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
-            Playability Score (%)
+            Playability (%)
           </button>
           <button
             type="button"
             onClick={() => setMetric('avgFps')}
-            className={`px-3 py-1.5 rounded text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
+            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
               metric === 'avgFps'
-                ? 'bg-[#1D2638] text-cyan-300'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-white dark:bg-[#1D2638] text-[#0D0E14] dark:text-white shadow-xs'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
             Average FPS
@@ -157,9 +156,9 @@ export function ProgressionChart({ repos }: ProgressionChartProps) {
         </div>
       </div>
 
-      <div className="p-4">
+      <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between">
         {/* Series Toggles */}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-3">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-4">
           {topRepos.map((repo, idx) => {
             const color = SERIES_COLORS[idx % SERIES_COLORS.length];
             const isHidden = hiddenRepoIds.has(repo.id);
@@ -178,26 +177,32 @@ export function ProgressionChart({ repos }: ProgressionChartProps) {
                 onClick={() => toggleSeries(repo.id)}
                 aria-pressed={!isHidden}
                 className={`inline-flex items-center gap-1.5 text-xs font-mono transition-opacity cursor-pointer ${
-                  isHidden ? 'opacity-35 line-through' : 'opacity-100 hover:text-white'
+                  isHidden ? 'opacity-35 line-through' : 'opacity-100'
                 }`}
               >
                 <span
                   aria-hidden="true"
-                  className="w-2.5 h-0.5 rounded-full inline-block"
+                  className="w-2.5 h-1 rounded-full inline-block"
                   style={{ backgroundColor: color }}
                 />
-                <span className="text-slate-300">{getSeriesLabel(repo)}</span>
-                <span className="text-slate-500 tabular-nums">{currentVal}</span>
+                <span className="text-slate-700 dark:text-slate-300 font-medium">
+                  {getSeriesLabel(repo)}
+                </span>
+                <span className="text-slate-400 dark:text-slate-500 tabular-nums">
+                  {currentVal}
+                </span>
               </button>
             );
           })}
         </div>
 
         {!hasChartData ? (
-          <div className="rounded-md border border-dashed border-[#242F44] bg-[#0D1119]/70 px-6 py-12 text-center">
-            <p className="font-mono text-sm font-semibold text-slate-400">N/A</p>
-            <p className="text-xs text-slate-400 mt-1.5 max-w-md mx-auto leading-relaxed">
-              No {metric === 'score' ? 'playability score' : 'FPS'} history has been recorded yet. Log real benchmarks on any repository to plot live progression over time.
+          <div className="rounded-2xl border border-dashed border-slate-200 dark:border-[#242F44] bg-slate-50/80 dark:bg-[#0D1119]/70 px-6 py-14 text-center">
+            <p className="font-display text-lg font-bold text-slate-400 dark:text-slate-500">
+              N/A
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 max-w-md mx-auto leading-relaxed">
+              No {metric === 'score' ? 'playability score' : 'FPS'} history has been recorded yet. Log real benchmarks on any contender card to plot live progression.
             </p>
           </div>
         ) : (
@@ -209,7 +214,6 @@ export function ProgressionChart({ repos }: ProgressionChartProps) {
               aria-label={`Recorded ${metric === 'score' ? 'Playability Score' : 'Average FPS'} progression chart`}
               onMouseLeave={() => setHoverIndex(null)}
             >
-              {/* Horizontal grid lines & Y axis labels */}
               {yTicks.map((tick) => {
                 const y = getY(tick);
                 return (
@@ -219,14 +223,14 @@ export function ProgressionChart({ repos }: ProgressionChartProps) {
                       x2={width - padRight}
                       y1={y}
                       y2={y}
-                      stroke="#1D2535"
+                      className="stroke-slate-100 dark:stroke-[#1D2535]"
                       strokeWidth="1"
                     />
                     <text
                       x={padLeft - 8}
                       y={y + 4}
                       textAnchor="end"
-                      className="fill-slate-500 text-[10px] font-mono"
+                      className="fill-slate-400 dark:fill-slate-500 text-[10px] font-mono"
                     >
                       {metric === 'score' ? `${Math.round(tick)}%` : Math.round(tick)}
                     </text>
@@ -234,11 +238,15 @@ export function ProgressionChart({ repos }: ProgressionChartProps) {
                 );
               })}
 
-              {/* X axis labels */}
               {timelineDates.map((d, idx) => {
                 const isLast = idx === timelineDates.length - 1;
-                const isTooCloseToLast = timelineDates.length > 3 && idx === timelineDates.length - 2;
-                if (timelineDates.length > 5 && !isLast && (isTooCloseToLast || (idx !== 0 && idx % 3 !== 0))) {
+                const isTooCloseToLast =
+                  timelineDates.length > 3 && idx === timelineDates.length - 2;
+                if (
+                  timelineDates.length > 5 &&
+                  !isLast &&
+                  (isTooCloseToLast || (idx !== 0 && idx % 3 !== 0))
+                ) {
                   return null;
                 }
                 const x = getX(idx);
@@ -246,31 +254,35 @@ export function ProgressionChart({ repos }: ProgressionChartProps) {
                   <text
                     key={`${d.date}-${idx}`}
                     x={x}
-                    y={height - 8}
+                    y={height - 6}
                     textAnchor={
-                      pointCount === 1 ? 'middle' : idx === 0 ? 'start' : isLast ? 'end' : 'middle'
+                      pointCount === 1
+                        ? 'middle'
+                        : idx === 0
+                          ? 'start'
+                          : isLast
+                            ? 'end'
+                            : 'middle'
                     }
-                    className="fill-slate-500 text-[10px] font-mono"
+                    className="fill-slate-400 dark:fill-slate-500 text-[10px] font-mono"
                   >
                     {d.label}
                   </text>
                 );
               })}
 
-              {/* Active vertical crosshair */}
               {activeIdx !== null && (
                 <line
                   x1={getX(activeIdx)}
                   x2={getX(activeIdx)}
                   y1={padTop}
                   y2={padTop + plotH}
-                  stroke="#334155"
+                  className="stroke-slate-300 dark:stroke-slate-600"
                   strokeWidth="1"
                   strokeDasharray="3 3"
                 />
               )}
 
-              {/* Series polylines & data points */}
               {topRepos.map((repo, seriesIdx) => {
                 if (hiddenRepoIds.has(repo.id)) return null;
                 const color = SERIES_COLORS[seriesIdx % SERIES_COLORS.length];
@@ -295,7 +307,7 @@ export function ProgressionChart({ repos }: ProgressionChartProps) {
                       <polyline
                         fill="none"
                         stroke={color}
-                        strokeWidth={seriesIdx === 0 ? '2.25' : '1.75'}
+                        strokeWidth={seriesIdx === 0 ? '2.5' : '2'}
                         strokeLinejoin="round"
                         strokeLinecap="round"
                         points={pointsStr}
@@ -306,17 +318,16 @@ export function ProgressionChart({ repos }: ProgressionChartProps) {
                         key={`${repo.id}-${p.date}`}
                         cx={getX(p.idx)}
                         cy={getY(p.val)}
-                        r={activeIdx === p.idx ? 4.5 : 3.5}
+                        r={activeIdx === p.idx ? 5 : 4}
                         fill={color}
-                        stroke="#0B0E14"
-                        strokeWidth="1.5"
+                        className="stroke-white dark:stroke-[#131822]"
+                        strokeWidth="2"
                       />
                     ))}
                   </g>
                 );
               })}
 
-              {/* Invisible hover columns */}
               {timelineDates.map((d, idx) => {
                 const colW = pointCount <= 1 ? plotW : plotW / Math.max(1, pointCount - 1);
                 const x = pointCount <= 1 ? padLeft : Math.max(padLeft, getX(idx) - colW / 2);
@@ -335,9 +346,8 @@ export function ProgressionChart({ repos }: ProgressionChartProps) {
               })}
             </svg>
 
-            {/* Compact Monospace Crosshair Readout Strip */}
-            <div className="mt-2.5 pt-2.5 border-t border-[#1C2434] flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono">
-              <span className="text-slate-400">
+            <div className="mt-3 pt-3 border-t border-slate-100 dark:border-[#1E2636] flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono">
+              <span className="text-slate-500 dark:text-slate-400">
                 {activeIdx !== null
                   ? `Snapshot: ${timelineDates[activeIdx].label}`
                   : `Latest recorded (${timelineDates[timelineDates.length - 1].label})`}
@@ -359,8 +369,16 @@ export function ProgressionChart({ repos }: ProgressionChartProps) {
                         style={{ backgroundColor: color }}
                         aria-hidden="true"
                       />
-                      <span className="text-slate-400">{getSeriesLabel(repo)}:</span>
-                      <span className={val !== null ? 'text-slate-100 font-semibold' : 'text-slate-500'}>
+                      <span className="text-slate-500 dark:text-slate-400">
+                        {getSeriesLabel(repo)}:
+                      </span>
+                      <span
+                        className={
+                          val !== null
+                            ? 'text-[#0D0E14] dark:text-slate-100 font-semibold'
+                            : 'text-slate-400 dark:text-slate-500'
+                        }
+                      >
                         {val !== null
                           ? metric === 'score'
                             ? `${val}%`

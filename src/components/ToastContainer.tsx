@@ -21,12 +21,19 @@ export function ToastContainer({ toasts, onDismiss }: ToastContainerProps) {
       className="fixed bottom-4 right-4 z-50 flex flex-col gap-2.5 max-w-sm w-[calc(100vw-2rem)] pointer-events-none"
     >
       {toasts.map((toast) => {
-        const tone =
+        const iconTone =
           toast.variant === 'emerald'
-            ? 'border-emerald-500/40 bg-[#111C19] text-emerald-200'
+            ? 'text-emerald-600 dark:text-emerald-400'
             : toast.variant === 'amber'
-              ? 'border-amber-500/40 bg-[#1C1810] text-amber-200'
-              : 'border-cyan-500/40 bg-[#101A22] text-cyan-200';
+              ? 'text-amber-600 dark:text-amber-400'
+              : 'text-pink-600 dark:text-cyan-400';
+
+        const borderTone =
+          toast.variant === 'emerald'
+            ? 'border-emerald-200 dark:border-emerald-500/40'
+            : toast.variant === 'amber'
+              ? 'border-amber-200 dark:border-amber-500/40'
+              : 'border-slate-200 dark:border-cyan-500/40';
 
         const Icon =
           toast.variant === 'emerald'
@@ -39,18 +46,20 @@ export function ToastContainer({ toasts, onDismiss }: ToastContainerProps) {
           <div
             key={toast.id}
             role="status"
-            className={`pointer-events-auto rounded-lg border px-3.5 py-3 shadow-xl shadow-black/50 flex items-start gap-2.5 ${tone}`}
+            className={`pointer-events-auto rounded-2xl border bg-white dark:bg-[#131822] px-4 py-3.5 shadow-xl shadow-slate-900/10 dark:shadow-black/50 flex items-start gap-3 ${borderTone}`}
           >
-            <Icon className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" />
+            <Icon className={`w-4 h-4 shrink-0 mt-0.5 ${iconTone}`} aria-hidden="true" />
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-slate-100">{toast.title}</p>
-              <p className="text-xs text-slate-300 mt-0.5 leading-snug">{toast.body}</p>
+              <p className="text-xs font-bold text-[#0D0E14] dark:text-slate-100">{toast.title}</p>
+              <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 leading-snug">
+                {toast.body}
+              </p>
             </div>
             <button
               type="button"
               onClick={() => onDismiss(toast.id)}
               aria-label={`Dismiss ${toast.title}`}
-              className="text-slate-400 hover:text-slate-100 p-0.5 cursor-pointer"
+              className="text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 p-0.5 cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>

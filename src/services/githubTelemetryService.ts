@@ -229,6 +229,8 @@ export async function verifyGithubRepository(
       full_name: string;
       description: string | null;
       stargazers_count: number;
+      forks_count?: number;
+      license?: { spdx_id?: string | null } | null;
       open_issues_count: number;
       default_branch: string;
       html_url: string;
@@ -278,6 +280,8 @@ export async function verifyGithubRepository(
       fullName: repoData.full_name ?? `${owner}/${repo}`,
       description: repoData.description ?? null,
       stars: typeof repoData.stargazers_count === 'number' ? repoData.stargazers_count : null,
+      forks: typeof repoData.forks_count === 'number' ? repoData.forks_count : null,
+      license: repoData.license?.spdx_id && repoData.license.spdx_id !== 'NOASSERTION' ? repoData.license.spdx_id : null,
       openIssues: typeof repoData.open_issues_count === 'number' ? repoData.open_issues_count : null,
       defaultBranch: repoData.default_branch ?? null,
       avatarUrl: repoData.owner?.avatar_url ?? '',
@@ -388,6 +392,8 @@ export async function syncTrackedReposFromGithub(
           fullName: result.fullName,
           description: result.description,
           stars: result.stars,
+          forks: result.forks ?? null,
+          license: result.license ?? null,
           openIssues: result.openIssues,
           defaultBranch: result.defaultBranch,
           avatarUrl: result.avatarUrl,

@@ -109,38 +109,45 @@ export function UpdateBenchmarkModal({
       aria-label={`Update Benchmark Scores for ${repo.fullName}`}
     >
       <div
-        className="fixed inset-0 bg-black/70 backdrop-blur-[2px]"
+        className="fixed inset-0 bg-slate-950/55 dark:bg-black/75"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      <div className="relative z-10 w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-lg bg-[#131822] border border-[#253044] shadow-2xl shadow-black/80">
-        <div className="px-5 py-4 border-b border-[#1E2636] flex items-center justify-between">
+      <div className="relative z-10 w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-[24px] bg-white dark:bg-[#131822] border border-slate-200 dark:border-[#253044] shadow-2xl">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-[#1E2636] flex items-center justify-between">
           <div>
-            <h2 className="text-base font-bold text-slate-50">Update Benchmark Scores</h2>
-            <p className="text-xs font-mono text-cyan-300 mt-0.5">{repo.fullName}</p>
+            <h2 className="font-display text-lg font-bold text-[#0D0E14] dark:text-white">
+              Log Benchmark Scores
+            </h2>
+            <p className="text-xs font-mono text-pink-600 dark:text-pink-400 mt-0.5">
+              {repo.fullName}
+            </p>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close Update Benchmark modal"
-            className="w-8 h-8 rounded-md inline-flex items-center justify-center text-slate-400 hover:text-slate-100 hover:bg-[#1E2636] cursor-pointer"
+            className="w-8 h-8 rounded-full inline-flex items-center justify-center text-slate-500 hover:text-[#0D0E14] dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1E2636] cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
             <div className="sm:col-span-5">
-              <label htmlFor="bench-gpu" className="block text-xs text-slate-300 mb-1 whitespace-nowrap">
+              <label
+                htmlFor="bench-gpu"
+                className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1 whitespace-nowrap"
+              >
                 GPU Target
               </label>
               <select
                 id="bench-gpu"
                 value={gpuTarget}
                 onChange={(e) => setGpuTarget(e.target.value as GpuTarget)}
-                className="w-full bg-[#0B0E14] border border-[#253044] rounded-md px-2.5 py-2 text-xs text-slate-100"
+                className="w-full bg-slate-50 dark:bg-[#0B0E14] border border-slate-200 dark:border-[#253044] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-slate-100"
               >
                 <option value="AMD RDNA3/4">AMD RDNA3/4</option>
                 <option value="NVIDIA Ada/Blackwell">NVIDIA Ada/Blackwell</option>
@@ -148,7 +155,10 @@ export function UpdateBenchmarkModal({
               </select>
             </div>
             <div className="sm:col-span-2">
-              <label htmlFor="bench-fps" className="block text-xs text-slate-300 mb-1 whitespace-nowrap">
+              <label
+                htmlFor="bench-fps"
+                className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1 whitespace-nowrap"
+              >
                 Avg FPS
               </label>
               <input
@@ -160,11 +170,14 @@ export function UpdateBenchmarkModal({
                 value={avgFps}
                 onChange={(e) => setAvgFps(e.target.value)}
                 placeholder="N/A"
-                className="w-full bg-[#0B0E14] border border-[#253044] rounded-md px-2.5 py-2 text-xs font-mono text-slate-100 placeholder:text-slate-600 tabular-nums"
+                className="w-full bg-slate-50 dark:bg-[#0B0E14] border border-slate-200 dark:border-[#253044] rounded-xl px-3 py-2 text-xs font-mono text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 tabular-nums"
               />
             </div>
             <div className="sm:col-span-2">
-              <label htmlFor="bench-low" className="block text-xs text-slate-300 mb-1 whitespace-nowrap">
+              <label
+                htmlFor="bench-low"
+                className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1 whitespace-nowrap"
+              >
                 1% Low
               </label>
               <input
@@ -176,11 +189,14 @@ export function UpdateBenchmarkModal({
                 value={onePercentLow}
                 onChange={(e) => setOnePercentLow(e.target.value)}
                 placeholder="N/A"
-                className="w-full bg-[#0B0E14] border border-[#253044] rounded-md px-2.5 py-2 text-xs font-mono text-slate-100 placeholder:text-slate-600 tabular-nums"
+                className="w-full bg-slate-50 dark:bg-[#0B0E14] border border-slate-200 dark:border-[#253044] rounded-xl px-3 py-2 text-xs font-mono text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 tabular-nums"
               />
             </div>
             <div className="sm:col-span-3">
-              <label htmlFor="bench-ram" className="block text-xs text-slate-300 mb-1 whitespace-nowrap">
+              <label
+                htmlFor="bench-ram"
+                className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1 whitespace-nowrap"
+              >
                 RAM (GB)
               </label>
               <input
@@ -192,23 +208,23 @@ export function UpdateBenchmarkModal({
                 value={ramGb}
                 onChange={(e) => setRamGb(e.target.value)}
                 placeholder="N/A"
-                className="w-full bg-[#0B0E14] border border-[#253044] rounded-md px-2.5 py-2 text-xs font-mono text-slate-100 placeholder:text-slate-600 tabular-nums"
+                className="w-full bg-slate-50 dark:bg-[#0B0E14] border border-slate-200 dark:border-[#253044] rounded-xl px-3 py-2 text-xs font-mono text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 tabular-nums"
               />
             </div>
           </div>
 
-          <div className="rounded-lg border border-[#1E2636] bg-[#0F141D] p-4 space-y-3">
+          <div className="rounded-2xl border border-slate-200/80 dark:border-[#1E2636] bg-slate-50 dark:bg-[#0E131D] p-4 space-y-3">
             <div className="flex items-center justify-between text-xs">
-              <label className="inline-flex items-center gap-2 font-semibold text-slate-200 cursor-pointer">
+              <label className="inline-flex items-center gap-2 font-semibold text-slate-800 dark:text-slate-200 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={includeMilestones}
                   onChange={(e) => setIncludeMilestones(e.target.checked)}
-                  className="rounded border-[#253044] bg-[#0B0E14] accent-emerald-500"
+                  className="rounded border-slate-300 dark:border-[#253044] accent-pink-500"
                 />
                 Record Milestone Scores
               </label>
-              <span className="font-mono font-bold text-emerald-300 tabular-nums">
+              <span className="font-mono font-bold text-pink-600 dark:text-pink-400 tabular-nums">
                 Playability: {nextScore !== null ? `${nextScore}%` : 'N/A'}
               </span>
             </div>
@@ -219,10 +235,10 @@ export function UpdateBenchmarkModal({
                 return (
                   <div key={key}>
                     <div className="flex items-center justify-between text-xs mb-1">
-                      <label htmlFor={`bench-ms-${key}`} className="text-slate-300">
+                      <label htmlFor={`bench-ms-${key}`} className="text-slate-700 dark:text-slate-300">
                         {meta.label}
                       </label>
-                      <span className="font-mono text-cyan-300 tabular-nums">
+                      <span className="font-mono text-pink-600 dark:text-pink-400 tabular-nums">
                         {val} / {meta.max}
                       </span>
                     </div>
@@ -244,8 +260,11 @@ export function UpdateBenchmarkModal({
           </div>
 
           <div>
-            <label htmlFor="bench-note" className="block text-xs text-slate-300 mb-1">
-              Benchmark Notes (logged to Live Feed)
+            <label
+              htmlFor="bench-note"
+              className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1"
+            >
+              Benchmark Notes (logged to What Changed)
             </label>
             <input
               id="bench-note"
@@ -253,21 +272,21 @@ export function UpdateBenchmarkModal({
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="e.g. Tested 1440p Medium on RX 7900 XTX"
-              className="w-full bg-[#0B0E14] border border-[#253044] rounded-md px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-400"
+              className="w-full bg-slate-50 dark:bg-[#0B0E14] border border-slate-200 dark:border-[#253044] rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-pink-500"
             />
           </div>
 
-          <div className="pt-2 border-t border-[#1E2636] flex items-center justify-end gap-2">
+          <div className="pt-3 border-t border-slate-100 dark:border-[#1E2636] flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-md border border-[#253044] text-xs font-medium text-slate-300 hover:text-slate-100 cursor-pointer"
+              className="px-4 py-2 rounded-full border border-slate-200 dark:border-[#253044] text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-[#0D0E14] dark:hover:text-white cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-md bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-semibold cursor-pointer"
+              className="px-5 py-2 rounded-full bg-[#0D0E14] hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-[#0D0E14] text-xs font-semibold cursor-pointer"
             >
               Save Benchmark
             </button>

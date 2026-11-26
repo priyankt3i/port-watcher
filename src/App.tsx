@@ -42,16 +42,30 @@ import {
   DEFAULT_API_SETTINGS,
 } from './data/seedData';
 import { TopHeader } from './components/TopHeader';
-import { GlobalStatsTicker } from './components/GlobalStatsTicker';
+import { HeroSection } from './components/HeroSection';
+import { ProgressOverviewCard } from './components/ProgressOverviewCard';
 import { LeaderboardSection } from './components/LeaderboardSection';
 import { ProgressionChart } from './components/ProgressionChart';
 import { LiveFeedPanel } from './components/LiveFeedPanel';
 import { WatchlistAlertsPanel } from './components/WatchlistAlertsPanel';
+import { ScoringMethodology } from './components/ScoringMethodology';
 import { MilestoneDrawer } from './components/MilestoneDrawer';
 import { AddRepoModal } from './components/AddRepoModal';
 import { UpdateBenchmarkModal } from './components/UpdateBenchmarkModal';
 import { ApiSettingsModal } from './components/ApiSettingsModal';
 import { ToastContainer, type ToastItem } from './components/ToastContainer';
+
+const THEME_STORAGE_KEY = 'portwatch_theme_v1';
+
+function loadInitialTheme(): 'light' | 'dark' {
+  try {
+    const saved = window.localStorage.getItem(THEME_STORAGE_KEY);
+    if (saved === 'dark' || saved === 'light') return saved;
+  } catch {
+    // ignore storage errors
+  }
+  return 'light';
+}
 
 function appendTodayHistorySnapshot(
   history: TrackedRepo['history14d'],
@@ -78,6 +92,7 @@ function appendTodayHistorySnapshot(
 }
 
 export default function App() {
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => loadInitialTheme());
   const [repos, setRepos] = useState<TrackedRepo[]>(() => loadPersistedRepos());
   const [feedEvents, setFeedEvents] = useState<FeedEvent[]>(() => loadPersistedFeed());
   const [alertRules, setAlertRules] = useState<AlertRule[]>(() => loadPersistedRules());
@@ -88,6 +103,7 @@ export default function App() {
 
   const [rateLimit, setRateLimit] = useState<RateLimitInfo | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
   const [browserPermission, setBrowserPermission] = useState<
     NotificationPermission | 'unsupported'
   >(() => getBrowserNotificationPermission());
@@ -98,7 +114,6 @@ export default function App() {
   const [benchmarkRepo, setBenchmarkRepo] = useState<TrackedRepo | null>(null);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
-  // Refs to access latest state cleanly inside timers & callbacks
   const reposRef = useRef(repos);
   reposRef.current = repos;
   const rulesRef = useRef(alertRules);
@@ -108,7 +123,21 @@ export default function App() {
   const isSyncingRef = useRef(false);
   const hasCompletedInitialSyncRef = useRef(false);
 
-  // Persist to localStorage whenever core collections update
+  // Sync HTML .dark class with theme state
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    try {
+      window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    } catch {
+      // ignore storage errors
+    }
+  }, [theme]);
+
   useEffect(() => {
     savePersistedRepos(repos);
   }, [repos]);
@@ -212,7 +241,6 @@ export default function App() {
     [mergeFeedEvents, pushToastAndAlert]
   );
 
-  // Trigger a single simulation tick (only when user explicitly enables Simulation Mode)
   const runSimulationTick = useCallback(
     (manual = false) => {
       const prevRepos = reposRef.current;
@@ -245,7 +273,6 @@ export default function App() {
     [applyAlertEvaluation, mergeFeedEvents, pushToastAndAlert]
   );
 
-  // Poll Live GitHub REST API
   const runGithubSync = useCallback(
     async (manual = false, isInitialHydration = false) => {
       if (isSyncingRef.current) return;
@@ -274,6 +301,7 @@ export default function App() {
         const { ranked, leadChanged } = rankRepos(result.repos, prevRanks, prevLeaderId);
 
         setRepos(ranked);
+        setLastSyncedAt(new Date().toISOString());
         mergeFeedEvents(result.newFeedEvents);
 
         if (!isInitialHydration) {
@@ -300,14 +328,12 @@ export default function App() {
     [applyAlertEvaluation, mergeFeedEvents, pushToastAndAlert]
   );
 
-  // Initial live GitHub sync on mount
   useEffect(() => {
     if (settingsRef.current.simulationMode) return;
     if (hasCompletedInitialSyncRef.current) return;
     void runGithubSync(false, true);
   }, [runGithubSync]);
 
-  // Auto Simulation Mode Loop (only when user explicitly toggles Simulation Mode ON)
   useEffect(() => {
     if (!settings.simulationMode) return;
     let timeoutId: number;
@@ -322,7 +348,6 @@ export default function App() {
     return () => window.clearTimeout(timeoutId);
   }, [settings.simulationMode, runSimulationTick]);
 
-  // Live GitHub API Polling Loop (30s / 1m / 5m)
   useEffect(() => {
     if (settings.simulationMode) return;
     const intervalId = window.setInterval(() => {
@@ -331,7 +356,6 @@ export default function App() {
     return () => window.clearInterval(intervalId);
   }, [settings.simulationMode, settings.pollingIntervalSeconds, runGithubSync]);
 
-  // Handlers
   const handleManualRefresh = () => {
     if (settings.simulationMode) {
       runSimulationTick(true);
@@ -447,7 +471,6 @@ export default function App() {
 
     applyAlertEvaluation(prevRepos, ranked, leadChanged);
 
-    // If added without prior GitHub verification, immediately fetch live metadata from GitHub
     if (newRepo.syncStatus === 'pending') {
       void (async () => {
         const result = await verifyGithubRepository(
@@ -471,6 +494,8 @@ export default function App() {
             fullName: result.fullName,
             description: result.description,
             stars: result.stars,
+            forks: result.forks ?? null,
+            license: result.license ?? null,
             openIssues: result.openIssues,
             defaultBranch: result.defaultBranch,
             avatarUrl: result.avatarUrl,
@@ -601,7 +626,9 @@ export default function App() {
 
     const fpsText = payload.avgFps !== null ? `${payload.avgFps.toFixed(1)} FPS avg` : 'FPS N/A';
     const lowText =
-      payload.onePercentLowFps !== null ? `${payload.onePercentLowFps.toFixed(1)} 1% low` : '1% low N/A';
+      payload.onePercentLowFps !== null
+        ? `${payload.onePercentLowFps.toFixed(1)} 1% low`
+        : '1% low N/A';
     const scoreText = nextScore !== null ? `${nextScore}%` : 'N/A';
 
     const newEvents: FeedEvent[] = [
@@ -738,8 +765,11 @@ export default function App() {
       'cyan',
       false
     );
-    // If PAT was updated while in live mode, immediately trigger a live sync
-    if (patch.githubPat !== undefined && patch.githubPat !== settings.githubPat && !settings.simulationMode) {
+    if (
+      patch.githubPat !== undefined &&
+      patch.githubPat !== settings.githubPat &&
+      !settings.simulationMode
+    ) {
       window.setTimeout(() => void runGithubSync(true, false), 100);
     }
   };
@@ -772,16 +802,18 @@ export default function App() {
   const existingRepoIds = useMemo(() => new Set(repos.map((r) => r.id)), [repos]);
 
   return (
-    <div className="min-h-screen bg-[#0B0E14] text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[#F6F7FA] dark:bg-[#0B0E14] text-[#0D0E14] dark:text-slate-100 flex flex-col transition-colors">
       <TopHeader
+        theme={theme}
         settings={settings}
         rateLimit={rateLimit}
         isSyncing={isSyncing}
+        lastSyncedAt={lastSyncedAt}
         notifications={notifications}
         browserPermission={browserPermission}
+        onToggleTheme={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
         onOpenAddRepo={() => setIsAddRepoOpen(true)}
         onOpenSettings={() => setIsSettingsOpen(true)}
-        onToggleSimulation={handleToggleSimulation}
         onManualRefresh={handleManualRefresh}
         onToggleBrowserNotifications={() => void handleToggleBrowserNotifications()}
         onMarkAllNotificationsRead={() =>
@@ -790,43 +822,74 @@ export default function App() {
         onClearNotifications={() => setNotifications([])}
       />
 
-      <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 lg:px-6 py-5 space-y-5">
-        {/* Global Telemetry Stats Strip */}
-        <GlobalStatsTicker stats={globalStats} />
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 pt-5 pb-16 space-y-10">
+        {/* Hero Banner + Overlapping Master Progress Showcase Card */}
+        <div>
+          <HeroSection
+            stats={globalStats}
+            repos={repos}
+            settings={settings}
+            rateLimit={rateLimit}
+            isSyncing={isSyncing}
+            onToggleSimulation={handleToggleSimulation}
+            onManualRefresh={handleManualRefresh}
+            onOpenSettings={() => setIsSettingsOpen(true)}
+          />
 
-        {/* 2-Column Responsive Dashboard Grid (70% Main / 30% Side on Desktop) */}
-        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,7fr)_minmax(0,3fr)] gap-5 items-start">
-          {/* Left / Main Column (70%) */}
-          <div className="space-y-5 min-w-0">
-            <LeaderboardSection
-              repos={repos}
-              selectedRepoId={selectedRepoId}
-              onSelectRepo={setSelectedRepoId}
-              onToggleStar={handleToggleStar}
-              onOpenUpdateBenchmark={(repo) => setBenchmarkRepo(repo)}
-              onRemoveRepo={handleRemoveRepo}
-              onOpenAddRepo={() => setIsAddRepoOpen(true)}
-            />
+          <ProgressOverviewCard
+            stats={globalStats}
+            repos={repos}
+            onSelectRepo={setSelectedRepoId}
+          />
+        </div>
 
-            <ProgressionChart repos={repos} />
+        {/* Horizontal "What Changed" Live Commit & Telemetry Strip */}
+        <LiveFeedPanel events={feedEvents} onSelectRepo={setSelectedRepoId} />
+
+        {/* Editorial Race Leaderboard Cards */}
+        <LeaderboardSection
+          repos={repos}
+          selectedRepoId={selectedRepoId}
+          onSelectRepo={setSelectedRepoId}
+          onToggleStar={handleToggleStar}
+          onOpenUpdateBenchmark={(repo) => setBenchmarkRepo(repo)}
+          onRemoveRepo={handleRemoveRepo}
+          onOpenAddRepo={() => setIsAddRepoOpen(true)}
+        />
+
+        {/* Progression History + Watchlist & Alert Rules */}
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-6 items-stretch">
+          <ProgressionChart repos={repos} />
+
+          <WatchlistAlertsPanel
+            repos={repos}
+            rules={alertRules}
+            onSelectRepo={setSelectedRepoId}
+            onToggleStar={handleToggleStar}
+            onToggleRule={handleToggleRule}
+            onDeleteRule={handleDeleteRule}
+            onAddRule={handleAddRule}
+          />
+        </div>
+
+        {/* Transparent Scoring Methodology */}
+        <ScoringMethodology />
+      </main>
+
+      {/* Quiet Editorial Footer */}
+      <footer className="border-t border-slate-200/80 dark:border-[#1E2636] bg-white/60 dark:bg-[#0D1119]/60">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
+          <div>
+            <span className="font-display font-bold text-[#0D0E14] dark:text-white">
+              PortWatch Live
+            </span>{' '}
+            · Real-time GitHub developer race & compatibility tracker. No game files, keys, or synthetic benchmark scores are hosted here.
           </div>
-
-          {/* Right Column (30%) */}
-          <div className="space-y-5 min-w-0">
-            <LiveFeedPanel events={feedEvents} onSelectRepo={setSelectedRepoId} />
-
-            <WatchlistAlertsPanel
-              repos={repos}
-              rules={alertRules}
-              onSelectRepo={setSelectedRepoId}
-              onToggleStar={handleToggleStar}
-              onToggleRule={handleToggleRule}
-              onDeleteRule={handleDeleteRule}
-              onAddRule={handleAddRule}
-            />
+          <div className="font-mono shrink-0">
+            Live data: api.github.com
           </div>
         </div>
-      </main>
+      </footer>
 
       {/* Interactive Milestone Breakdown Drawer */}
       <MilestoneDrawer
